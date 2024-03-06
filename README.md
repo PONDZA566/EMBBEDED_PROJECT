@@ -6,5 +6,5 @@ EMBBEDED SYSTEM GROUP G 1.17
   2.นำ library ที่ได้จากการแตกไฟล์ไปใส่ใน Arduino library
   3.สามารถเลือกรันได้ 2 ส่วนโดย
     - รัน Super_Embbeded_Final เพื่อให้สามารถทำการ tracking ใบหน้าโดยอัติโนมัติได้
-    - รัน Embbed MQTT เพื่อควบุมการหมุนของ servo ผ่านการใช้ MQTT
+    - รัน Embbed MQTT เพื่อควบุมการหมุนของ servo ผ่านการใช้ MQTT และนำ data.txt ใส่เข้าไปใน MQTT Tiles เพื่อให้สามารถใช้งานผ่าน MQTT ได้
  
