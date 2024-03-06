@@ -27,6 +27,7 @@
 
 #define SDA 15
 #define SCL 14
+LCD_I2C lcd(0x27, 16, 2);
 
 using eloq::camera;
 using eloq::ei::fomo;
@@ -45,17 +46,16 @@ bool c;
 bool d;
 bool t = false;
 
-int pos_x = 0;
+int pos_x = 90;
 int last_target_x = 0;
 int target_x = 0;
 int center_cam_x = 48;
 
-int pos_y = 0;
+int pos_y = 30;
 int last_target_y = 0;
 int target_y = 0;
 int center_cam_y = 48;
 
-LCD_I2C lcd(0x27, 16, 2); 
 
 const char ssid[] = "Ok";
 const char pass[] = "q12345678";
@@ -149,27 +149,26 @@ void setup() {
     baseservo.attach(12); 
     midservo.attach(13);
 
-    if (!pcf.begin(PCF8574_Address, &Wire)) {
-    Serial.println("Couldn't find PCF8574");
-    }
-    pcf.pinMode(0, INPUT);
-    pcf.pinMode(1, INPUT);
-    
-    lcd.begin();
-    baseservo.attach(12); 
-    midservo.attach(13);
-    WiFi.begin(ssid, pass);
+    //if (!pcf.begin(PCF8574_Address, &Wire)) {
+    //Serial.println("Couldn't find PCF8574");
+    //}
+    //pcf.pinMode(0, INPUT);
+    //pcf.pinMode(1, INPUT);
 
     // Note: Local domain names (e.g. "Computer.local" on OSX) are not supported
     // by Arduino. You need to set the IP address directly.
-    client.begin(mqtt_broker, MQTT_PORT, net);
-    client.onMessage(messageReceived);
-    lcd.backlight();
-    connect();
+    //client.begin(mqtt_broker, MQTT_PORT, net);
+    //client.onMessage(messageReceived);
+    //connect();
+
+    midservo.write(pos_y);
+    Serial.println("servo complete");
 }
 
 
 void loop() {
+
+
 
 
     // capture picture
@@ -226,14 +225,15 @@ void loop() {
 //      });
 //    }
 
-  target_x = (int)fomo.first.x;
-  if(abs(target_x - last_target_x) < 10){                     //Safety about Frame-Lacking
+  target_x = (int)fomo.first.y;
+  if(abs(target_x - last_target_x) < 1){                     //Safety about Frame-Lacking
     if(center_cam_x - target_x > 2){
-      pos_x -= 1;
+      pos_x -= 4;
       baseservo.write(pos_x);
     }
     else if(center_cam_x - target_x < 2){
-      pos_x += 1;
+      pos_x += 4;
+      if(pos_x<1)pos_x = 1;
       baseservo.write(pos_x);
     }
   }
@@ -242,46 +242,48 @@ void loop() {
 
 
 
-  target_y = (int)fomo.first.y;
-  if(abs(target_y - last_target_y) < 20){                     //Safety about Frame-Lacking
-    if(center_cam_y - target_y > 5){
-      pos_y -= 1;
+  target_y = (int)fomo.first.x;
+  if(abs(target_y - last_target_y) < 1){                     //Safety about Frame-Lacking
+    if(center_cam_y - target_y > 2){
+      pos_y -= 4;
+      if(pos_y<1)pos_y = 1;
       midservo.write(pos_y);
     }
-    else if(center_cam_y - target_y < 5){
-      pos_y += 1;
+    else if(center_cam_y - target_y < 2){
+      pos_y += 4;
       midservo.write(pos_y);
     }
   }
   last_target_y = target_y;
   Serial.println("Mid Servo Position: " + String(pos_y));
 
-  if(pcf.digitalRead(0) == HIGH) t = true;
-  if(pcf.digitalRead(1) == HIGH) t = false;
-    // capture picture
-  if( t == true){
-    //tracking();
-    lcd.clear();
-    Serial.println("tracking");
-    lcd.print("Tracking");
-    delay(100);
-  }
-  else if( t == false){
-    lcd.clear();
-    lcd.print("MQTT");
-    Serial.println("MQTT");
-    lcd.setCursor(0,1);
-    if( c==false and d==false) lcd.print("Right");
-    else if(c==true and d==false) lcd.print("Left");
-    else if(c==false and d==true) lcd.print("Up");
-    else if(c==true and d==true) lcd.print("Down");
-    client.loop();
-    delay(10);  // <- fixes some issues with WiFi stability
+  // if(pcf.digitalRead(0) == HIGH) t = true;
+  // if(pcf.digitalRead(1) == HIGH) t = false;
+  //   // capture picture
+  // if( t == true){
+  //   //tracking();
+  //   lcd.clear();
+  //   Serial.println("tracking");
+  //   lcd.print("Tracking");
+  //   delay(100);
+  // }
+  // else if( t == false){
+  //   lcd.clear();
+  //   lcd.print("MQTT");
+  //   Serial.println("MQTT");
+  //   lcd.setCursor(0,1);
+  //   if( c==false and d==false) lcd.print("Right");
+  //   else if(c==true and d==false) lcd.print("Left");
+  //   else if(c==false and d==true) lcd.print("Up");
+  //   else if(c==true and d==true) lcd.print("Down");
+  //   client.loop();
+  //   delay(10);  // <- fixes some issues with WiFi stability
 
-    if (!client.connected()) {
-      connect();
-    }
-  }
+  //   if (!client.connected()) {
+  //     connect();
+  //   }
+  // }
+
 }
 
 
